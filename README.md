@@ -112,14 +112,70 @@ Restart Nginx:
 Bash
 
 sudo systemctl restart nginx
-6. Set Up SSL (HTTPS)
-For a business site, HTTPS is mandatory. Use Certbot:
 
-Bash
+6. Set Up SSL (HTTPS – Wildcard for Subdomain Routing)
 
-sudo apt install certbot python3-certbot-nginx
-sudo certbot --nginx -d bitone.in -d www.bitone.in
-Follow the prompts to auto-configure SSL redirection.
+For BitOne Registrar mode (dynamic subdomains such as user.bitone.in), a wildcard SSL certificate is required.
+
+The standard --nginx method is not sufficient because wildcard domains require DNS validation.
+
+Install Certbot with Cloudflare DNS Plugin
+sudo apt update
+sudo apt install certbot python3-certbot-dns-cloudflare -y
+Create Cloudflare API Token
+
+Go to Cloudflare Dashboard
+
+Profile → API Tokens
+
+Create Token → Use template: Edit zone DNS
+
+Restrict to zone: bitone.in
+
+Copy the generated token
+
+Create Credentials File
+sudo nano /root/.cloudflare.ini
+
+Add:
+
+dns_cloudflare_api_token = YOUR_API_TOKEN_HERE
+
+Secure the file:
+
+sudo chmod 600 /root/.cloudflare.ini
+Issue Wildcard Certificate
+sudo certbot certonly \
+  --dns-cloudflare \
+  --dns-cloudflare-credentials /root/.cloudflare.ini \
+  --cert-name bitone.in \
+  -d bitone.in \
+  -d "*.bitone.in"
+
+This will create:
+
+/etc/letsencrypt/live/bitone.in/
+
+No nginx configuration changes are required if your SSL snippet already points to:
+
+/etc/letsencrypt/live/bitone.in/fullchain.pem
+Reload Nginx
+sudo nginx -t
+sudo systemctl reload nginx
+Verify Wildcard Coverage
+openssl x509 -in /etc/letsencrypt/live/bitone.in/fullchain.pem -noout -text | grep DNS
+
+Expected output:
+
+DNS:bitone.in
+DNS:*.bitone.in
+Automatic Renewal
+
+Certbot installs a systemd timer automatically.
+
+To test renewal:
+
+sudo certbot renew --dry-run
 
 ⚙️ Configuration & Customization
 Changing the GitHub Source
