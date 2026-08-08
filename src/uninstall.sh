@@ -1,21 +1,74 @@
 #!/bin/bash
-set -e
 
-echo "=== Dummy Uninstaller Script ==="
-echo "This script should remove all components installed by install.sh."
+# ==========================================
+# BitOne.in Uninstallation Script
+# Removes Website Files, Configs, and SSL
+# ==========================================
 
-# Example steps (replace with real commands):
-# 1. Stop services
-#    sudo systemctl stop tool.service
-#    sudo systemctl disable tool.service
+# Allow DOMAIN override via environment variable
+DOMAIN="${DOMAIN:-bitone.in}"
+WEB_ROOT="/var/www/$DOMAIN"
+NGINX_CONF_AVAILABLE="/etc/nginx/sites-available/$DOMAIN"
+NGINX_CONF_ENABLED="/etc/nginx/sites-enabled/$DOMAIN"
 
-# 2. Remove system packages
-#    sudo apt remove --purge -y <package>
+echo "⚠️  WARNING: You are about to remove components for $DOMAIN"
+echo "--------------------------------------------------------"
 
-# 3. Clean environment variables
-#    sudo sed -i '/TOOL_HOME=/d' /etc/environment
+# ==========================================
+# 1. Remove Website Files
+# ==========================================
+if [ -d "$WEB_ROOT" ]; then
+    echo "📂 Found website files at $WEB_ROOT"
+    read -p "❓ Do you want to delete these files? (y/N): " confirm
+    if [[ "$confirm" =~ ^[Yy]$ ]]; then
+        sudo rm -rf "$WEB_ROOT"
+        echo "✅ Website files deleted."
+    else
+        echo "⏭️  Skipping file deletion."
+    fi
+else
+    echo "⏭️  No website files found."
+fi
 
-# 4. Delete files and directories
-#    sudo rm -rf /opt/tool
+# ==========================================
+# 2. Remove Nginx Configuration
+# ==========================================
+if [ -f "$NGINX_CONF_AVAILABLE" ] || [ -L "$NGINX_CONF_ENABLED" ]; then
+    echo "⚙️  Found Nginx configuration for $DOMAIN"
+    read -p "❓ Do you want to remove the Nginx config? (y/N): " confirm
+    if [[ "$confirm" =~ ^[Yy]$ ]]; then
+        # Remove symlink
+        sudo rm -f "$NGINX_CONF_ENABLED"
+        # Remove actual file
+        sudo rm -f "$NGINX_CONF_AVAILABLE"
+        
+        # Reload Nginx to apply changes
+        if systemctl is-active --quiet nginx; then
+            sudo systemctl reload nginx
+        fi
+        echo "✅ Configuration removed and Nginx reloaded."
+    else
+        echo "⏭️  Skipping config removal."
+    fi
+else
+    echo "⏭️  No Nginx config found."
+fi
 
-echo "✅ Uninstallation complete (dummy run)"
+# ==========================================
+# 3. Remove SSL Certificates (Certbot)
+# ==========================================
+if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+    echo "🔒 Found SSL Certificates for $DOMAIN"
+    read -p "❓ Do you want to delete these certificates? (y/N): " confirm
+    if [[ "$confirm" =~ ^[Yy]$ ]]; then
+        sudo certbot delete --cert-name "$DOMAIN" --non-interactive
+        echo "✅ Certificates deleted."
+    else
+        echo "⏭️  Skipping SSL deletion."
+    fi
+else
+    echo "⏭️  No SSL certificates found."
+fi
+
+echo "--------------------------------------------------------"
+echo "🎉 Cleanup Complete!"
