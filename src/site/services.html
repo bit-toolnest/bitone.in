@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remote Services | BitOne.in</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="brand">BitOne.in</a>
+        <ul>
+            <li><a href="projects.html">Projects</a></li>
+            <li><a href="services.html">Remote Services</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h1>Remote Service Status</h1>
+        <p>Explore our active API endpoints. Authentication keys are required for production use.</p>
+
+        <div class="grid">
+            <div class="card">
+                <h3>Core Data Service</h3>
+                <div class="endpoint">POST /api/v1/core-data</div>
+                <p>High-speed data processing and storage retrieval service.</p>
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+                <a href="/docs" style="color: var(--accent); text-decoration: none;">View Docs &rarr;</a>
+            </div>
+
+            <div class="card">
+                <h3>Bit Auth Service</h3>
+                <div class="endpoint">GET /api/v1/auth/status</div>
+                <p>Centralized authentication and session management for remote clients.</p>
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+                <a href="/docs" style="color: var(--accent); text-decoration: none;">View Docs &rarr;</a>
+            </div>
+
+            <div class="card">
+                <h3>Utility Stream</h3>
+                <div class="endpoint">WS /api/v1/stream</div>
+                <p>Real-time websocket connections for live updates and monitoring.</p>
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+                <a href="/docs" style="color: var(--accent); text-decoration: none;">View Docs &rarr;</a>
+            </div>
+        </div>
+        
+        <div style="margin-top: 3rem; background: #e2e8f0; padding: 2rem; border-radius: 8px;">
+            <h3>Need an API Key?</h3>
+            <p>Contact the Bit Research admin team to provision access for your application.</p>
+            <a href="mailto:admin@bitone.in" class="btn" style="background: var(--primary);">Contact Support</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Bit Research. Powered by Nginx.</p>
+    </footer>
+
+</body>
+</html>
